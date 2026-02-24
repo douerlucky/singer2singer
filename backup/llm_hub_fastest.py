@@ -30,7 +30,7 @@ DEGREE_ESTIMATE_PAGES = 1
 DEGREE_WORKERS = 10            # 并发线程数（本地API一般可以大一点）
 
 # DeepSeek (OpenAI-compatible)
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "sk-45882944f87042dca0d6c0a64742c2c0").strip()
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "").strip()
 DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1").strip()
 DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-chat").strip()
 DEEPSEEK_TIMEOUT = 20

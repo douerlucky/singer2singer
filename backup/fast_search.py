@@ -23,7 +23,7 @@ BEAM_WIDTH = 25                             # 每一层最多保留多少候选�
 MAX_EXPANSIONS = 400                        # 最多展开多少个歌手节点，防止跑飞
 
 # DeepSeek (OpenAI-compatible)
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "sk-45882944f87042dca0d6c0a64742c2c0").strip()
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "").strip()
 DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1").strip()
 DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-chat").strip()
 DEEPSEEK_TIMEOUT = 20
