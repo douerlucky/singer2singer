@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>挑战从一个歌手到另一个歌手</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=DM+Mono:wght@400;500&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #fdf8f3;
+      --bg2: #f5ede3;
+      --surface: #ffffff;
+      --border: #e8ddd3;
+      --border2: #f0e6da;
+      --accent: #e05c3a;
+      --accent2: #f0896a;
+      --text: #2a1f1a;
+      --text2: #7a6860;
+      --text3: #b0a09a;
+      --song-bg: #fff7f4;
+      --song-border: #fdddd5;
+      --shadow: 0 2px 16px rgba(80,40,20,0.08), 0 1px 3px rgba(80,40,20,0.05);
+      --shadow-hover: 0 8px 32px rgba(80,40,20,0.14), 0 2px 8px rgba(80,40,20,0.06);
+      --radius: 18px;
+      --img-size: 72px;
+    }
+
+    body {
+      font-family: 'Sora', 'Noto Serif SC', sans-serif;
+      background-color: #fdf8f3;
+      background-image:
+        radial-gradient(ellipse 800px 500px at 10% 0%, rgba(255,200,170,0.40) 0%, transparent 60%),
+        radial-gradient(ellipse 600px 400px at 90% 10%, rgba(255,230,210,0.30) 0%, transparent 55%),
+        radial-gradient(ellipse 1000px 600px at 50% 100%, rgba(240,220,200,0.25) 0%, transparent 60%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 20;
+      padding: 20px 24px;
+      background: rgba(253,248,243,0.88);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border2);
+    }
+    .topbar-inner {
+      max-width: 680px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 14px; align-items: center;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Noto Serif SC', serif;
+      font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: 0.5px;
+    }
+    .brand-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(224,92,58,0.18);
+    }
+    .controls {
+      display: flex; gap: 10px; width: 100%; align-items: center;
+    }
+    .input-wrap { flex: 1; position: relative; }
+    .input-label {
+      position: absolute; top: -9px; left: 12px;
+      background: #fdf8f3; padding: 0 4px;
+      font-size: 10px; font-weight: 600; color: var(--text2);
+      letter-spacing: 1px; text-transform: uppercase;
+      font-family: 'DM Mono', monospace; border-radius: 4px;
+    }
+    .input {
+      width: 100%; padding: 12px 16px;
+      border-radius: 14px; border: 1.5px solid var(--border);
+      background: #ffffff; color: var(--text);
+      font-family: 'Sora', sans-serif; font-size: 14px;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input::placeholder { color: var(--text3); }
+    .input:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px rgba(224,92,58,0.10);
+    }
+    .btn {
+      padding: 12px 24px; border-radius: 14px; border: none; cursor: pointer;
+      background: var(--accent); color: white;
+      font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14px;
+      box-shadow: 0 4px 16px rgba(224,92,58,0.30);
+      transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      background: var(--accent2); transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(224,92,58,0.35);
+    }
+    .btn:active { transform: translateY(0); }
+
+    /* ── Main ── */
+    .wrap {
+      max-width: 680px; margin: 0 auto; padding: 36px 24px 80px;
+    }
+
+    .status { text-align: center; padding: 12px 0; }
+    .loading {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 12px 20px; border-radius: 999px;
+      border: 1px solid var(--border); background: #ffffff;
+      color: var(--text2); font-size: 14px;
+      box-shadow: var(--shadow);
+    }
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .meta {
+      text-align: center; margin-bottom: 28px;
+      color: var(--text2); font-size: 14px;
+    }
+    .meta b { color: var(--accent); font-weight: 700; }
+
+    .error-msg {
+      text-align: center; padding: 16px 24px;
+      background: #fff5f3; border: 1px solid #fdddd5;
+      border-radius: 14px; color: var(--accent); font-size: 14px;
+    }
+
+    /* ── Chain ── */
+    .chain { display: flex; flex-direction: column; align-items: center; }
+
+    /* ── Card ── */
+    .card {
+      width: 100%; display: flex; align-items: center; gap: 16px;
+      padding: 14px 18px; border-radius: var(--radius);
+      border: 1px solid var(--border2); background: #ffffff;
+      box-shadow: var(--shadow); text-decoration: none; color: inherit;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      animation: fadeSlideIn 0.35s ease both;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover); border-color: var(--border);
+    }
+    .card.song-card { background: var(--song-bg); border-color: var(--song-border); }
+    .card.song-card:hover { border-color: var(--accent2); }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-img {
+      width: var(--img-size); height: var(--img-size);
+      border-radius: 12px; object-fit: cover;
+      background: var(--bg2); flex-shrink: 0;
+      border: 1px solid var(--border2);
+    }
+    .song-card .card-img { border-radius: 10px; }
+
+    .card-body {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column; justify-content: center; gap: 5px;
+    }
+    .card-type {
+      font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--accent); opacity: 0.75;
+    }
+    .card-name {
+      font-size: 16px; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-family: 'Noto Serif SC', serif; line-height: 1.3;
+    }
+    .card-artists {
+      font-size: 12px; color: var(--text2);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .card-id { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); }
+
+    /* ── Connector ── */
+    .connector {
+      display: flex; flex-direction: column; align-items: center; padding: 6px 0;
+    }
+    .connector-line {
+      width: 1.5px; height: 20px;
+      background: linear-gradient(to bottom, var(--border), #e8ddd3);
+    }
+    .connector-icon {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: #ffffff; border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; box-shadow: 0 1px 4px rgba(80,40,20,0.07);
+    }
+
+    .hint {
+      text-align: center; margin-top: 28px;
+      color: var(--text3); font-size: 12px; font-family: 'DM Mono', monospace;
+    }
+
+    @media (max-width: 600px) {
+      .controls { flex-wrap: wrap; }
+      :root { --img-size: 60px; }
+      .card-name { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      挑战从一个歌手到另一个歌手
+    </div>
+    <div class="controls">
+      <div class="input-wrap">
+        <span class="input-label">起点</span>
+        <input class="input" id="start" placeholder="歌手名，例：吴京" />
+      </div>
+      <div class="input-wrap">
+        <span class="input-label">终点</span>
+        <input class="input" id="end" placeholder="歌手名，例：Akie秋绘" />
+      </div>
+      <button class="btn" onclick="explore()">探索</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="status" id="status"></div>
+  <div class="meta" id="meta"></div>
+  <div class="chain" id="chain"></div>
+  <div class="hint" id="hint"></div>
+</div>
+
+<script>
+function esc(s) {
+  return String(s ?? "")
+    .replaceAll("&","&amp;").replaceAll("<","&lt;")
+    .replaceAll(">","&gt;").replaceAll('"',"&quot;");
+}
+
+function artistCard(a, delay = 0) {
+  const pic = a.picUrl
+    ? `/img-proxy?url=${encodeURIComponent(a.picUrl)}`
+    : "https://placehold.co/72x72/f0e6da/b0a09a?text=♪";
+  return `
+    <a class="card" href="${esc(a.url)}" target="_blank" style="animation-delay:${delay}ms">
+      <img class="card-img" src="${esc(pic)}" alt="${esc(a.name)}" />
+      <div class="card-body">
+        <div class="card-type">歌手</div>
+        <div class="card-name">${esc(a.name)}</div>
+        <div class="card-id">id: ${esc(a.id)}</div>
+      </div>
+    </a>`;
+}
+
+function songCard(s, delay = 0) {
+  const cover = s.cover
+    ? `/img-proxy?url=${encodeURIComponent(s.cover)}`
+    : "https://placehold.co/72x72/fdddd5/e05c3a?text=♫";
+  const artists = (s.artists && s.artists.length > 0) ? s.artists.join(" · ") : "";
+  return `
+    <a class="card song-card" href="${esc(s.url)}" target="_blank" style="animation-delay:${delay}ms">
+      <img class="card-img" src="${esc(cover)}" alt="${esc(s.name)}" />
+      <div class="card-body">
+        <div class="card-type">歌曲</div>
+        <div class="card-name">${esc(s.name)}</div>
+        ${artists ? `<div class="card-artists">${esc(artists)}</div>` : ""}
+        <div class="card-id">id: ${esc(s.id)}</div>
+      </div>
+    </a>`;
+}
+
+function connector(icon, delay = 0) {
+  return `
+    <div class="connector" style="animation-delay:${delay}ms">
+      <div class="connector-line"></div>
+      <div class="connector-icon">${icon}</div>
+      <div class="connector-line"></div>
+    </div>`;
+}
+
+async function explore() {
+  const start  = document.getElementById("start").value.trim();
+  const end    = document.getElementById("end").value.trim();
+  const status = document.getElementById("status");
+  const meta   = document.getElementById("meta");
+  const chain  = document.getElementById("chain");
+  const hint   = document.getElementById("hint");
+
+  chain.innerHTML = ""; meta.innerHTML = ""; hint.innerHTML = "";
+  status.innerHTML = `<span class="loading"><span class="spinner"></span>正在搜索，歌手越冷门越慢，喝杯茶吧 ☕</span>`;
+
+  let data;
+  try {
+    const res = await fetch("/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ start, end })
+    });
+    data = await res.json();
+  } catch (e) {
+    status.innerHTML = "";
+    meta.innerHTML = `<div class="error-msg">网络错误：${esc(e.message)}</div>`;
+    return;
+  }
+
+  status.innerHTML = "";
+
+  if (!data.success) {
+    meta.innerHTML = `<div class="error-msg">❌ ${esc(data.message)}</div>`;
+    return;
+  }
+
+  meta.innerHTML = `找到路径：<b>${data.steps}</b> 步 &nbsp;·&nbsp; 用时 <b>${data.elapsed}s</b>`;
+
+  let html = "", delay = 0;
+  const step = 60;
+
+  if (data.path.length > 0) {
+    html += artistCard(data.path[0].from, delay); delay += step;
+  }
+  data.path.forEach(s => {
+    html += connector("⬇", delay); delay += step;
+    html += songCard(s.song, delay); delay += step;
+    html += connector("⬇", delay); delay += step;
+    html += artistCard(s.to, delay); delay += step;
+  });
+
+  chain.innerHTML = html;
+  hint.textContent = "点击卡片可跳转至网易云音乐";
+}
+</script>
+</body>
+</html>
